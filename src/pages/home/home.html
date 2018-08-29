@@ -1,14 +1,58 @@
-<ion-header>
-  <ion-navbar>
+<ion-header class="home-header">
+  <ion-navbar color="primary">
     <ion-title>
-      Ionic Blank
+      Planner
     </ion-title>
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
-  The world is your oyster.
-  <p>
-    If you get lost, the <a href="http://ionicframework.com/docs/v2">docs</a> will be your guide.
-  </p>
+<ion-content padding class="home-content">
+  <ion-row>
+    <ion-col>
+      <ion-item>
+        <ion-input type="text" [(ngModel)]="newItem.name" placeholder="Add Item"></ion-input>
+      </ion-item>
+    </ion-col>
+    <ion-col >
+      <button ion-button (click)="addItem()" [disabled]="newItem.name=='' || newItem.name == undefined">Add!</button>
+    </ion-col>
+    <ion-col col-2>
+      <!-- <button ion-item  (click)="logout()"> -->
+        <ion-icon ion-item item-left color="primary" name="log-out" (click)="logout()"></ion-icon>
+        <!-- </button> -->
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col>
+      <button ion-button (click)="moveCurrent()" small>Move to Today</button>
+    </ion-col>
+    <ion-col>
+      <ion-item>
+        <ion-label>Date</ion-label>
+        <ion-datetime (ngModelChange)="changeDate()" displayFormat="MM/DD/YYYY" [(ngModel)]="myDate">
+        </ion-datetime>
+      </ion-item>
+    </ion-col>
+  </ion-row>
+  <ion-list>
+    <ion-item-sliding (ionSwipe)="removeItem(item.$key)" *ngFor="let item of filPlannerItems; let i = index" [ngStyle]="{'background-color':item.status === 'completed' ? 'red' : 'yellow' }">
+      <ion-item [ngStyle]="{'background-color':item.status === 'completed' ? 'red' : 'yellow' }">
+        <!-- <ion-card-header> -->
+        <ion-row>
+          <span *ngIf="!isCompleted(item)">Due by {{item.due_days}} Days</span>
+          <span *ngIf="isCompleted(item)">Completed</span>
+        </ion-row>
+        <!-- </ion-card-header> -->
+        <!-- <ion-card-content> -->
+        <ion-icon name="md-checkmark-circle" *ngIf="isCompleted(item)" item-left large></ion-icon>
+        <ion-icon name="md-checkmark-circle-outline" *ngIf="!isCompleted(item)" (click)="updateCompleted(item.$key)" item-left large></ion-icon>
+        <ion-row>
+          {{ item.name}}
+        </ion-row>
+      </ion-item>
+      <ion-item-options side="right">
+        <button ion-button expandable color="danger" (click)="removeItem(item.$key)">Delete</button>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
 </ion-content>
