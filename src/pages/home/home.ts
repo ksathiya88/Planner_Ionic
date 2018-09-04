@@ -6,6 +6,10 @@ import { AlertController } from "ionic-angular";
 import { DatePicker } from '@ionic-native/date-picker';
 import { AuthService } from './../../providers/auth-service/auth-service';
 import {LoginPage} from '../../pages/login/login';
+import { Subscription } from 'rxjs';
+import { DragulaService } from 'ng2-dragula';
+// import 'ng2-dragula/demo/assets/css/dragula.min.css';
+//import { DragulaService } from 'ng2-dragula/dist/ng2-dragula';
 
 //import {PlannerItem} from './home.interface'; 
 
@@ -16,22 +20,81 @@ import {LoginPage} from '../../pages/login/login';
 export class HomePage {
   //plannerItems: FirebaseListObservable<any[]>;
   newItem: IPlannerItem = {};
+  PLANNERITEMS = 'PLANNERITEMS';
   plannerItems: Array<IPlannerItem> = [];
   filPlannerItems: Array<IPlannerItem> = [];
   myDate: string;
   subscribeObj: any;
   uid:string;
+  subs = new Subscription();
 
-  constructor(public navCtrl: NavController, private auth: AuthService,private datePicker: DatePicker, public firebaseProvider: FirebaseProvider, public alertCtrl: AlertController) {
+
+  constructor(public navCtrl: NavController, private dragulaService: DragulaService,private auth: AuthService,private datePicker: DatePicker, public firebaseProvider: FirebaseProvider, public alertCtrl: AlertController) {
     let curr_date_obj = new Date();
     this.myDate = new Date().toISOString();
     this.getPlannerItems();
+    
     let userObj = this.auth.UserObj;
       //this.username = info['name'];
       //this.email = info['email'];
     this.uid = userObj.uid;  
+    // this._DRAG.drag.subscribe((val) =>
+    // {
+    //    // Log the retrieved HTML element ID value
+    //    console.log('Is dragging: ' + val[1].id);
+    // });
+
+
+
+    // // Subscribe to the drop event for the list component once it has
+    // // been dropped into location by the user
+    // this._DRAG.drop.subscribe((val) =>
+    // {
+    //    // Log the retrieved HTML ID value and the re-ordered list value
+    //    console.log('Is dropped: ' + val[1].id);
+    //    this.onDrop(val[2]);
+    // });
+
+    this.subs.add(this.dragulaService.drag("PLANNERITEMS")
+    .subscribe(({ name, el, source }) => {
+      // ...
+      console.log("drag"+name+" "+el+" "+source);
+    })
+  );
+  this.subs.add(this.dragulaService.drop("PLANNERITEMS")
+    .subscribe(({ name, el, target, source, sibling }) => {
+      // ...
+      console.log("drop"+name+" "+el+" "+source);
+      console.log("new PlannerItem"+JSON.stringify(this.filPlannerItems));
+      this.filPlannerItems.forEach((item,index)=>{
+          item.priority=index;
+          console.log("index "+index+" "+item.$key);
+          this.updateItem(item.$key, {priority: index});
+      }) 
+
+
+    })
+  );
+  // some events have lots of properties, just pick the ones you need
+  this.subs.add(this.dragulaService.dropModel("PLANNERITEMS")
+    // WHOA
+    // .subscribe(({ name, el, target, source, sibling, sourceModel, targetModel, item }) => {
+    .subscribe(({ sourceModel, targetModel, item }) => {
+      // ...
+      console.log("dropModel"+name+" "+sourceModel+" "+targetModel);
+    })
+  );
+
+  // // You can also get all events, not limited to a particular group
+  // this.subs.add(this.dragulaService.drop()
+  //   .subscribe(({ name, el, target, source, sibling }) => {
+  //     // ...
+  //     console.log("drop"+name+" "+el+" "+source);
+  //   })
+    
   }
 
+  
 
   public logout() {
     this.auth.logout().subscribe(succ => {
@@ -59,6 +122,9 @@ export class HomePage {
       this.filPlannerItems = this.mapPlannerItem(plannerItems,new Date(this.myDate.replace(/T.*/,"")))
                        .sort((item1:IPlannerItem,item2:IPlannerItem)=>{
           return  item2.due_days - item1.due_days;
+      })
+      this.filPlannerItems = this.filPlannerItems.sort((item1:IPlannerItem,item2:IPlannerItem)=>{
+            return item1.priority-item2.priority;
       })
       console.log(JSON.stringify(this.filPlannerItems));
     })
@@ -134,7 +200,7 @@ export class HomePage {
         {
           text: 'Yes, go ahead',
           handler: () => {
-            this.updateItem(id, { status: Status.COMPLETED });
+            this.updateItem(id, { status: Status.COMPLETED ,priority:100});
           }
         },
         {
@@ -190,9 +256,14 @@ export class HomePage {
     return item.status === Status.COMPLETED;
   }
 
+  isDueDateToday(item: IPlannerItem): boolean {
+    return item.due_days === 0;
+  }
+
 }
 
 interface IPlannerItem {
+  $key?:string;
   name?: string;
   date?: IDate;
   priority?: number;

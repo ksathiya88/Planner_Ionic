@@ -34,13 +34,14 @@
       </ion-item>
     </ion-col>
   </ion-row>
-  <ion-list>
+  <ion-list class="container"  dragula="PLANNERITEMS" [(dragulaModel)]="filPlannerItems">
     <ion-item-sliding (ionSwipe)="removeItem(item.$key)" *ngFor="let item of filPlannerItems; let i = index" [ngStyle]="{'background-color':item.status === 'completed' ? 'red' : 'yellow' }">
       <ion-item [ngStyle]="{'background-color':item.status === 'completed' ? 'red' : 'yellow' }">
         <!-- <ion-card-header> -->
         <ion-row>
-          <span *ngIf="!isCompleted(item)">Due by {{item.due_days}} Days</span>
-          <span *ngIf="isCompleted(item)">Completed</span>
+          <b><span *ngIf="!isCompleted(item) && !isDueDateToday(item)">Due by {{item.due_days}} Days</span>
+          <span *ngIf="!isCompleted(item) && isDueDateToday(item)">Created on this date</span>
+          <span *ngIf="isCompleted(item)">Completed</span></b>
         </ion-row>
         <!-- </ion-card-header> -->
         <!-- <ion-card-content> -->
