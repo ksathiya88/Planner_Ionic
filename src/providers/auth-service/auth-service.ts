@@ -18,15 +18,27 @@ export class User {
 
 @Injectable()
 export class AuthService {
-  currentUser: User;
 
   private user: firebase.User;
+  public currentUser :firebase.User;
 
   constructor(public afAuth: AngularFireAuth) {
+
+    console.log("user11111"+JSON.stringify(afAuth.auth.currentUser));
+    this.currentUser = afAuth.auth.currentUser;
+    //this.user=afAuth.auth.currentUser;
+   // afAuth.auth.currentUser 
     afAuth.authState.subscribe(user => {
       console.log("Authenticated User" + JSON.stringify(user));
       this.user = user;
     });
+  }
+
+  isLoggedIn() {
+    if (this.user == null) {
+      return false;
+    }
+    return true;
   }
 
   public get UserObj():firebase.User {
@@ -44,15 +56,8 @@ export class AuthService {
       credentials.password);
   }
 
-  public getUserInfo(): User {
-    return this.currentUser;
-  }
 
   public logout() {
-    return Observable.create(observer => {
-      this.currentUser = null;
-      observer.next(true);
-      observer.complete();
-    });
+    return this.afAuth.auth.signOut();
   }
 }

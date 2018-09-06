@@ -3,7 +3,9 @@ import { NavController, AlertController, LoadingController, Loading, IonicPage }
 import { AuthService } from '../../providers/auth-service/auth-service';
 import {HomePage} from '../../pages/home/home';
 import {RegisterPage} from '../../pages/register/register';
- 
+
+import { Storage } from '@ionic/storage';
+
 @Component({
   selector: 'page-login',
   templateUrl: 'login.html',
@@ -13,7 +15,7 @@ export class LoginPage {
   loading: Loading;
   registerCredentials = { email: '', password: '' };
  
-  constructor(private nav: NavController, private auth: AuthService, private alertCtrl: AlertController, private loadingCtrl: LoadingController) { }
+  constructor(private nav: NavController, private storage:Storage,private auth: AuthService, private alertCtrl: AlertController, private loadingCtrl: LoadingController) { }
  
   public createAccount() {
     this.nav.push(RegisterPage);
@@ -23,8 +25,9 @@ export class LoginPage {
     console.log("Entered login Page");
     this.showLoading()
     this.auth.login(this.registerCredentials).then((allowed) => {
-      console.log("Allowed"+JSON.stringify(allowed));
+      console.log("Allowed"+allowed);
       // if (allowed) {        
+     // this.storage.set('uid', allowed);  
       this.nav.push(HomePage);
       // } else {
       //   this.showError("Access Denied");

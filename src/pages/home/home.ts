@@ -8,6 +8,10 @@ import { AuthService } from './../../providers/auth-service/auth-service';
 import {LoginPage} from '../../pages/login/login';
 import { Subscription } from 'rxjs';
 import { DragulaService } from 'ng2-dragula';
+import { Storage } from '@ionic/storage';
+import { UserServiceProvider } from './../../providers/user-service/user-service';
+import { AngularFireAuth } from 'angularfire2/auth';
+
 // import 'ng2-dragula/demo/assets/css/dragula.min.css';
 //import { DragulaService } from 'ng2-dragula/dist/ng2-dragula';
 
@@ -29,31 +33,16 @@ export class HomePage {
   subs = new Subscription();
 
 
-  constructor(public navCtrl: NavController, private dragulaService: DragulaService,private auth: AuthService,private datePicker: DatePicker, public firebaseProvider: FirebaseProvider, public alertCtrl: AlertController) {
+  constructor(public navCtrl: NavController,public afAuth: AngularFireAuth,public storage: Storage, private dragulaService: DragulaService,private auth: AuthService,private datePicker: DatePicker, public firebaseProvider: FirebaseProvider, public alertCtrl: AlertController) {
     let curr_date_obj = new Date();
     this.myDate = new Date().toISOString();
-    this.getPlannerItems();
+    afAuth.authState.subscribe(user => {
+     this.getPlannerItems(user);
+    });
     
-    let userObj = this.auth.UserObj;
-      //this.username = info['name'];
-      //this.email = info['email'];
-    this.uid = userObj.uid;  
-    // this._DRAG.drag.subscribe((val) =>
-    // {
-    //    // Log the retrieved HTML element ID value
-    //    console.log('Is dragging: ' + val[1].id);
-    // });
 
 
 
-    // // Subscribe to the drop event for the list component once it has
-    // // been dropped into location by the user
-    // this._DRAG.drop.subscribe((val) =>
-    // {
-    //    // Log the retrieved HTML ID value and the re-ordered list value
-    //    console.log('Is dropped: ' + val[1].id);
-    //    this.onDrop(val[2]);
-    // });
 
     this.subs.add(this.dragulaService.drag("PLANNERITEMS")
     .subscribe(({ name, el, source }) => {
@@ -85,33 +74,23 @@ export class HomePage {
     })
   );
 
-  // // You can also get all events, not limited to a particular group
-  // this.subs.add(this.dragulaService.drop()
-  //   .subscribe(({ name, el, target, source, sibling }) => {
-  //     // ...
-  //     console.log("drop"+name+" "+el+" "+source);
-  //   })
+
     
   }
 
-  
 
-  public logout() {
-    this.auth.logout().subscribe(succ => {
-      this.navCtrl.setRoot(LoginPage);
-    });
-  }
-
-
+  logout(){
+    this.auth.logout();
+  } 
   /**
    * For getting planner items for a particular date
    * also creates a subscription and a subscribe object
    * for myDate
    */
-  getPlannerItems() {
+  getPlannerItems(user1) {
     //let date:string=date;
-    console.log("came inside method22222222222");
-    let observable = this.firebaseProvider.getPlannerItems();
+    console.log("came inside method22222222222"+user1);
+    let observable = this.firebaseProvider.getPlannerItems(user1);
     this.subscribeObj = observable.subscribe((items: IPlannerItem[]) => {
       console.log("came inside" + this.myDate.replace(/T.*/,""));
       this.plannerItems = items;
@@ -225,7 +204,7 @@ export class HomePage {
   changeDate() {
     console.log("cames inside changeDate"+this.myDate);
     this.subscribeObj.unsubscribe();
-    this.getPlannerItems();
+    this.getPlannerItems(this.auth.UserObj);
   }
 
   getCurrentDateObj():IDate {
