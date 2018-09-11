@@ -29,8 +29,9 @@ export class FirebaseProvider {
   }
  
   addPlannerItem(name) {
+    console.log("add object",JSON.stringify(name));
     this.afd.list('/plannerItems'+'-'+this.uid+'/').push(name);
-    this.afd.list('/plannerItems'+'-'+this.uid+'/').update
+    this.afd.list('/plannerItems'+'-'+this.uid+'/').update;
   }
  
   removeItem(id) {
@@ -38,6 +39,7 @@ export class FirebaseProvider {
   }
 
   updatePlannerItem(id,changedObj){
+    console.log("uid-key",id);
     this.afd.list('/plannerItems'+'-'+this.uid+'/').update(id,changedObj);
   }
 }

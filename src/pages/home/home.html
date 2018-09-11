@@ -36,7 +36,7 @@
   </ion-row>
   <ion-list class="container"  dragula="PLANNERITEMS" [(dragulaModel)]="filPlannerItems">
     <ion-item-sliding (ionSwipe)="removeItem(item.$key)" *ngFor="let item of filPlannerItems; let i = index" [ngStyle]="{'background-color':item.status === 'completed' ? 'red' : 'yellow' }">
-      <ion-item [ngStyle]="{'background-color':item.status === 'completed' ? 'red' : 'yellow' }">
+      <ion-item (click)="presentPlannerModal(item)" [ngStyle]="{'background-color':item.status === 'completed' ? 'red' : 'yellow' }">
         <!-- <ion-card-header> -->
         <ion-row>
           <b><span *ngIf="!isCompleted(item) && !isDueDateToday(item)">Due by {{item.due_days}} Days</span>
@@ -46,7 +46,7 @@
         <!-- </ion-card-header> -->
         <!-- <ion-card-content> -->
         <ion-icon name="md-checkmark-circle" *ngIf="isCompleted(item)" item-left large></ion-icon>
-        <ion-icon name="md-checkmark-circle-outline" *ngIf="!isCompleted(item)" (click)="updateCompleted(item.$key)" item-left large></ion-icon>
+        <ion-icon name="md-checkmark-circle-outline" *ngIf="!isCompleted(item)" (click)="updateCompleted($event,item.$key);$event.stopPropagation()" item-left large></ion-icon>
         <ion-row>
           {{ item.name}}
         </ion-row>

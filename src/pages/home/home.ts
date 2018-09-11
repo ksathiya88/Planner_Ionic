@@ -11,11 +11,12 @@ import { DragulaService } from 'ng2-dragula';
 import { Storage } from '@ionic/storage';
 import { UserServiceProvider } from './../../providers/user-service/user-service';
 import { AngularFireAuth } from 'angularfire2/auth';
+import {IDate } from '../../interfaces/interface';
+import {Status,Icons}  from '../../Enums/enum';
+import {PlannerItemComponent} from '../../components/planner-item/planner-item';
+import {PlannerItemModalPage} from '../../pages/planner-item-modal/planner-item-modal';
+import { ModalController, NavParams } from 'ionic-angular';
 
-// import 'ng2-dragula/demo/assets/css/dragula.min.css';
-//import { DragulaService } from 'ng2-dragula/dist/ng2-dragula';
-
-//import {PlannerItem} from './home.interface'; 
 
 @Component({
   selector: 'page-home',
@@ -23,24 +24,34 @@ import { AngularFireAuth } from 'angularfire2/auth';
 })
 export class HomePage {
   //plannerItems: FirebaseListObservable<any[]>;
-  newItem: IPlannerItem = {};
+
+  $key:string;
+  name: string;
+  date: IDate;
+  priority: number;
+  due_days: number;
+  status: Status;
+  updates:[String];
+  newItem: PlannerItemComponent = new PlannerItemComponent();
   PLANNERITEMS = 'PLANNERITEMS';
-  plannerItems: Array<IPlannerItem> = [];
-  filPlannerItems: Array<IPlannerItem> = [];
+  plannerItems: Array<PlannerItemComponent> = [];
+  filPlannerItems: Array<PlannerItemComponent> = [];
   myDate: string;
   subscribeObj: any;
   uid:string;
   subs = new Subscription();
 
 
-  constructor(public navCtrl: NavController,public afAuth: AngularFireAuth,public storage: Storage, private dragulaService: DragulaService,private auth: AuthService,private datePicker: DatePicker, public firebaseProvider: FirebaseProvider, public alertCtrl: AlertController) {
+  constructor( public modalCtrl: ModalController,public navCtrl: NavController,public afAuth: AngularFireAuth,public storage: Storage, 
+    private dragulaService: DragulaService,private auth: AuthService,private datePicker: DatePicker, 
+    public firebaseProvider: FirebaseProvider, public alertCtrl: AlertController) {
     let curr_date_obj = new Date();
     this.myDate = new Date().toISOString();
     afAuth.authState.subscribe(user => {
      this.getPlannerItems(user);
     });
     
-
+ 
 
 
 
@@ -78,20 +89,42 @@ export class HomePage {
     
   }
 
+  
 
   logout(){
     this.auth.logout();
   } 
+
+  presentPlannerModal(item:PlannerItemComponent) {
+    console.log("no1111key"+item.$key);
+    console.log("methodmodal"+JSON.stringify(item));
+    console.log("methodmodal11111"+JSON.stringify(item));
+    let plannerModal = this.modalCtrl.create(PlannerItemModalPage, { item: item });
+    plannerModal.onDidDismiss(data => {
+      console.log("dismissed data"+JSON.stringify(data));
+      console.log("dismissed data11111"+item.$key);
+
+      this.updateItem(item.$key, {name:data.name,updates:data.updates});
+    });
+    plannerModal.present();
+  }
+ 
   /**
    * For getting planner items for a particular date
    * also creates a subscription and a subscribe object
    * for myDate
    */
   getPlannerItems(user1) {
+
+    //this.presentProfileModal();
+
     //let date:string=date;
     console.log("came inside method22222222222"+user1);
     let observable = this.firebaseProvider.getPlannerItems(user1);
-    this.subscribeObj = observable.subscribe((items: IPlannerItem[]) => {
+    this.subscribeObj = observable.subscribe((items: PlannerItemComponent[]) => {
+      items = items.map((dto_obj:any)=>{
+        return PlannerItemComponent.fromDto(dto_obj);
+      })
       console.log("came inside" + this.myDate.replace(/T.*/,""));
       this.plannerItems = items;
       let curr_obj = this.getDateObject(this.myDate.replace(/T.*/,""));
@@ -99,17 +132,17 @@ export class HomePage {
       console.log(JSON.stringify(items)+"----"+JSON.stringify(curr_obj));
       let plannerItems = this.filterPlannerItem(items, curr_obj);
       this.filPlannerItems = this.mapPlannerItem(plannerItems,new Date(this.myDate.replace(/T.*/,"")))
-                       .sort((item1:IPlannerItem,item2:IPlannerItem)=>{
+                       .sort((item1:PlannerItemComponent,item2:PlannerItemComponent)=>{
           return  item2.due_days - item1.due_days;
       })
-      this.filPlannerItems = this.filPlannerItems.sort((item1:IPlannerItem,item2:IPlannerItem)=>{
+      this.filPlannerItems = this.filPlannerItems.sort((item1:PlannerItemComponent,item2:PlannerItemComponent)=>{
             return item1.priority-item2.priority;
       })
       console.log(JSON.stringify(this.filPlannerItems));
     })
   }
 
-  filterPlannerItem(items: IPlannerItem[], curr_date_obj: IDate): IPlannerItem[] {
+  filterPlannerItem(items: PlannerItemComponent[], curr_date_obj: IDate): PlannerItemComponent[] {
     return items.filter((item) => {
       let present_date_obj = this.getCurrentDateObj();
       console.log("aa"+new Date(item.date.year+"-"+item.date.month+"-"+item.date.date).getTime());
@@ -139,7 +172,7 @@ export class HomePage {
     return Math.ceil(timeDiff / (1000 * 3600 * 24));
   }
 
-  mapPlannerItem(items: IPlannerItem[], curr_date_obj: Date): IPlannerItem[] {
+  mapPlannerItem(items:PlannerItemComponent[], curr_date_obj: Date): PlannerItemComponent[] {
     return items.map((item) => {
       if (item.status != Status.COMPLETED) {
           item.due_days = this.getDays(new Date(item.date.year+"-"+item.date.month+"-"+item.date.date), curr_date_obj);
@@ -157,6 +190,7 @@ export class HomePage {
     this.newItem.date = this.getDateObject(this.myDate.replace(/T.*/,""));
     this.newItem.status = Status.CREATED;
     this.newItem.priority = 1;
+    this.newItem.updates = [];
     console.log("new Item" + JSON.stringify(this.newItem));
     this.firebaseProvider.addPlannerItem(this.newItem);
   }
@@ -169,7 +203,9 @@ export class HomePage {
     this.firebaseProvider.updatePlannerItem(id, changedObj);
   }
 
-  updateCompleted(id) {
+  updateCompleted(event:Event,id) {
+  
+    event.stopPropagation();
 
     const alert = this.alertCtrl.create({
       title: 'Move to Completed',
@@ -231,41 +267,12 @@ export class HomePage {
   }
 
 
-  isCompleted(item: IPlannerItem): boolean {
+  isCompleted(item: PlannerItemComponent): boolean {
     return item.status === Status.COMPLETED;
   }
 
-  isDueDateToday(item: IPlannerItem): boolean {
+  isDueDateToday(item: PlannerItemComponent): boolean {
     return item.due_days === 0;
   }
 
-}
-
-interface IPlannerItem {
-  $key?:string;
-  name?: string;
-  date?: IDate;
-  priority?: number;
-  due_days?: number;
-  status?: Status;
-}
-
-
-interface IDate {
-  date: string;
-  month: string;
-  year: string;
-}
-
-enum Icons {
-  NOT_COMPLETED = "md-checkmark-circle-outline",
-  COMPLETED = "md-checkmark-circle"
-}
-
-
-enum Status {
-  CREATED = "created",
-  COMPLETED = "completed",
-  PARTIAL_COMPLETED = "partial_completed",
-  STARTED = "started"
 }

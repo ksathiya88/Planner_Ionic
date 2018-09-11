@@ -20,6 +20,8 @@ import { FirebaseProvider } from './../providers/firebase/firebase';
 import { DatePicker } from '@ionic-native/date-picker';
 import { AuthService } from '../providers/auth-service/auth-service';
 import { UserServiceProvider } from '../providers/user-service/user-service';
+import {PlannerItemComponent} from '../components/planner-item/planner-item';
+import {PlannerItemModalPage} from '../pages/planner-item-modal/planner-item-modal';
  
 const firebaseConfig = {
     apiKey: "AIzaSyCiQpcwhlRwc4p_V--111o-2PexiraT--4",
@@ -35,7 +37,9 @@ const firebaseConfig = {
     MyApp,
     HomePage,
     LoginPage,
-    RegisterPage
+    RegisterPage,
+    PlannerItemComponent,
+    PlannerItemModalPage
   ],
   imports: [
     BrowserModule,
@@ -51,7 +55,8 @@ const firebaseConfig = {
     MyApp,
     HomePage,
     LoginPage,
-    RegisterPage
+    RegisterPage,
+    PlannerItemModalPage
   ],
   providers: [
     StatusBar,
