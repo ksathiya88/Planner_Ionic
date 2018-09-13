@@ -50,6 +50,9 @@
         <ion-row>
           {{ item.name}}
         </ion-row>
+        <ion-row *ngIf="item.completed_percentage!=undefined">
+            <progress-bar [progress]="item.completed_percentage"></progress-bar>
+        </ion-row>
       </ion-item>
       <ion-item-options side="right">
         <button ion-button expandable color="danger" (click)="removeItem(item.$key)">Delete</button>

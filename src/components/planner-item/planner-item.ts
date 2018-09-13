@@ -20,6 +20,7 @@ export class PlannerItemComponent implements IPlannerItem  {
   due_days: number;
   status: Status;
   updates:Array<string>=[];
+  completed_percentage:number=0;
   
 
   constructor() {
@@ -36,6 +37,7 @@ export class PlannerItemComponent implements IPlannerItem  {
     plannerObj.due_days =dto_obj.due_days;
     plannerObj.status = dto_obj.status;
     plannerObj.updates = dto_obj.updates;
+    plannerObj.completed_percentage = dto_obj.completed_percentage;
     return plannerObj;
   }
 

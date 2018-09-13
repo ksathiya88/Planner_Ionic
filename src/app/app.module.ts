@@ -21,6 +21,7 @@ import { DatePicker } from '@ionic-native/date-picker';
 import { AuthService } from '../providers/auth-service/auth-service';
 import { UserServiceProvider } from '../providers/user-service/user-service';
 import {PlannerItemComponent} from '../components/planner-item/planner-item';
+import {ProgressBarComponent} from '../components/progress-bar/progress-bar';
 import {PlannerItemModalPage} from '../pages/planner-item-modal/planner-item-modal';
  
 const firebaseConfig = {
@@ -39,7 +40,8 @@ const firebaseConfig = {
     LoginPage,
     RegisterPage,
     PlannerItemComponent,
-    PlannerItemModalPage
+    PlannerItemModalPage,
+    ProgressBarComponent
   ],
   imports: [
     BrowserModule,

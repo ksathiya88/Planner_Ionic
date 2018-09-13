@@ -6,10 +6,10 @@ export interface IPlannerItem {
     priority?: number;
     due_days?: number;
     status?: Status;
-    updates?:Array<String>,
-    
+    updates?:Array<String>;
+    completed_percentage?:number;
   }
-  
+
   
   export interface IDate {
     date: string;

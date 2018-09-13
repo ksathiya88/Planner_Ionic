@@ -18,6 +18,7 @@ export class PlannerItemModalPage {
   item_name:string;
   newUpdate:string;
   item_updates:Array<string>;
+  item_comp_percentage:number;
   constructor(public navCtrl: NavController, public navParams: NavParams,public viewCtrl:ViewController) {
     console.log('Planner Item Object', JSON.stringify(navParams.get('item')));
 
@@ -34,7 +35,7 @@ export class PlannerItemModalPage {
       this.item.updates=[];
     }
     this.item_updates = this.item.updates;
-   
+    this.item_comp_percentage = this.item.completed_percentage;
   }
 
 
@@ -50,6 +51,9 @@ export class PlannerItemModalPage {
     // this.viewCtrl.dismiss(data);
     this.item.name=this.item_name;
     this.item.updates=this.item_updates;
+    this.item.completed_percentage=this.item_comp_percentage;
+    console.log("model"+JSON.stringify(this.item));
+    console.log(this.item.completed_percentage);
     this.viewCtrl.dismiss(this.item);
   }
 

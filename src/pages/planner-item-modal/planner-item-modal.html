@@ -36,7 +36,14 @@
       </ion-list>
     </ion-item>
     <ion-item>
-      <button ion-button (click)="dismiss()">Close</button>
+      <ion-label>Completed:<ion-badge>{{item_comp_percentage}}%</ion-badge></ion-label>
+      <ion-range min="0" max="100" step="10" snaps="true" [(ngModel)]="item_comp_percentage">
+          <ion-label range-left>0%</ion-label>
+          <ion-label range-right>100%</ion-label>
+      </ion-range>
+    </ion-item>
+    <ion-item>
+      <button ion-button (click)="dismiss()">Update</button>
     </ion-item>
   </ion-list>
 </ion-content>

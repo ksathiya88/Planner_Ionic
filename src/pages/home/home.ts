@@ -101,10 +101,13 @@ export class HomePage {
     console.log("methodmodal11111"+JSON.stringify(item));
     let plannerModal = this.modalCtrl.create(PlannerItemModalPage, { item: item });
     plannerModal.onDidDismiss(data => {
+      if (data!=null){
       console.log("dismissed data"+JSON.stringify(data));
       console.log("dismissed data11111"+item.$key);
+     // console.log("dismissed data11111");
 
-      this.updateItem(item.$key, {name:data.name,updates:data.updates});
+      this.updateItem(item.$key, {name:data.name,updates:data.updates,completed_percentage:data.completed_percentage});
+      }
     });
     plannerModal.present();
   }
@@ -191,6 +194,7 @@ export class HomePage {
     this.newItem.status = Status.CREATED;
     this.newItem.priority = 1;
     this.newItem.updates = [];
+    this.newItem.completed_percentage=0;
     console.log("new Item" + JSON.stringify(this.newItem));
     this.firebaseProvider.addPlannerItem(this.newItem);
   }
