@@ -16,11 +16,12 @@ import {Status,Icons}  from '../../Enums/enum';
 import {PlannerItemComponent} from '../../components/planner-item/planner-item';
 import {PlannerItemModalPage} from '../../pages/planner-item-modal/planner-item-modal';
 import { ModalController, NavParams } from 'ionic-angular';
-
+import {CalendarComponent} from "../../components/calendar/calendar";
 
 @Component({
   selector: 'page-home',
-  templateUrl: 'home.html'
+  templateUrl: 'home.html',
+  styles:['.text-input[disabled]{opacity: 1;cursor: pointer;}']
 })
 export class HomePage {
   //plannerItems: FirebaseListObservable<any[]>;
@@ -36,22 +37,22 @@ export class HomePage {
   PLANNERITEMS = 'PLANNERITEMS';
   plannerItems: Array<PlannerItemComponent> = [];
   filPlannerItems: Array<PlannerItemComponent> = [];
-  myDate: string;
+  myDate: Date;
   subscribeObj: any;
   uid:string;
   subs = new Subscription();
 
 
-  constructor( public modalCtrl: ModalController,public navCtrl: NavController,public afAuth: AngularFireAuth,public storage: Storage, 
-    private dragulaService: DragulaService,private auth: AuthService,private datePicker: DatePicker, 
+  constructor( public modalCtrl: ModalController,public navCtrl: NavController,public afAuth: AngularFireAuth,public storage: Storage,
+    private dragulaService: DragulaService,private auth: AuthService,private datePicker: DatePicker,
     public firebaseProvider: FirebaseProvider, public alertCtrl: AlertController) {
     let curr_date_obj = new Date();
-    this.myDate = new Date().toISOString();
+    this.myDate = new Date();
     afAuth.authState.subscribe(user => {
      this.getPlannerItems(user);
     });
-    
- 
+
+
 
 
 
@@ -70,7 +71,7 @@ export class HomePage {
           item.priority=index;
           console.log("index "+index+" "+item.$key);
           this.updateItem(item.$key, {priority: index});
-      }) 
+      })
 
 
     })
@@ -86,14 +87,30 @@ export class HomePage {
   );
 
 
-    
+
   }
 
-  
+
 
   logout(){
     this.auth.logout();
-  } 
+  }
+
+  presentCalendarModal(){
+    let calendarModal = this.modalCtrl.create(CalendarComponent);
+    calendarModal.onDidDismiss(data => {
+      if (data!=null){
+        console.log("dismissed data Calendat"+data);
+        this.myDate = new Date(data);
+        this.changeDate();
+        //console.log("dismissed data11111"+item.$key);
+        // console.log("dismissed data11111");
+
+        //this.updateItem(item.$key, {name:data.name,updates:data.updates,completed_percentage:data.completed_percentage});
+      }
+    });
+    calendarModal.present();
+  }
 
   presentPlannerModal(item:PlannerItemComponent) {
     console.log("no1111key"+item.$key);
@@ -111,7 +128,7 @@ export class HomePage {
     });
     plannerModal.present();
   }
- 
+
   /**
    * For getting planner items for a particular date
    * also creates a subscription and a subscribe object
@@ -128,13 +145,14 @@ export class HomePage {
       items = items.map((dto_obj:any)=>{
         return PlannerItemComponent.fromDto(dto_obj);
       })
-      console.log("came inside" + this.myDate.replace(/T.*/,""));
+      //console.log("came inside" + this.myDate.replace(/T.*/,""));
       this.plannerItems = items;
-      let curr_obj = this.getDateObject(this.myDate.replace(/T.*/,""));
+      let curr_obj = this.getDateObject(this.myDate);
       this.filPlannerItems = [];
       console.log(JSON.stringify(items)+"----"+JSON.stringify(curr_obj));
       let plannerItems = this.filterPlannerItem(items, curr_obj);
-      this.filPlannerItems = this.mapPlannerItem(plannerItems,new Date(this.myDate.replace(/T.*/,"")))
+      //this.filterPlannerItem = this.filterPlannerItem(items, curr_obj);
+      this.filPlannerItems = this.mapPlannerItem(plannerItems,curr_obj)
                        .sort((item1:PlannerItemComponent,item2:PlannerItemComponent)=>{
           return  item2.due_days - item1.due_days;
       })
@@ -155,8 +173,8 @@ export class HomePage {
         console.log("Pushing item" + JSON.stringify(item));
         return true;
       } else if ((new Date(item.date.year+"-"+item.date.month+"-"+item.date.date).getTime() <
-        new Date(curr_date_obj.year+"-"+curr_date_obj.month+"-"+curr_date_obj.date).getTime()) && (item.status != Status.COMPLETED) 
-        && (new Date(curr_date_obj.year+"-"+curr_date_obj.month+"-"+curr_date_obj.date).getTime()== 
+        new Date(curr_date_obj.year+"-"+curr_date_obj.month+"-"+curr_date_obj.date).getTime()) && (item.status != Status.COMPLETED)
+        && (new Date(curr_date_obj.year+"-"+curr_date_obj.month+"-"+curr_date_obj.date).getTime()==
         new Date(present_date_obj.year+"-"+present_date_obj.month+"-"+present_date_obj.date).getTime()) ) {
         console.log("Pushing item11111" + JSON.stringify(item));
         return true;
@@ -167,18 +185,19 @@ export class HomePage {
 
   }
 
-  
+
   getDays(date1: Date, date2: Date) {
-    
+
     console.log("Comparing"+date1+"-"+date2);
     let timeDiff = Math.abs(date2.getTime() - date1.getTime());
     return Math.ceil(timeDiff / (1000 * 3600 * 24));
   }
 
-  mapPlannerItem(items:PlannerItemComponent[], curr_date_obj: Date): PlannerItemComponent[] {
+  mapPlannerItem(items:PlannerItemComponent[], curr_date_obj: IDate): PlannerItemComponent[] {
     return items.map((item) => {
       if (item.status != Status.COMPLETED) {
-          item.due_days = this.getDays(new Date(item.date.year+"-"+item.date.month+"-"+item.date.date), curr_date_obj);
+          item.due_days = this.getDays(new Date(item.date.year+"-"+item.date.month+"-"+item.date.date),
+            new Date(curr_date_obj.year+"-"+curr_date_obj.month+"-"+curr_date_obj.date));
       }else {
          item.due_days=-20;
       }
@@ -189,14 +208,18 @@ export class HomePage {
 
 
   addItem() {
-    console.log("item name" + this.newItem.name);
-    this.newItem.date = this.getDateObject(this.myDate.replace(/T.*/,""));
-    this.newItem.status = Status.CREATED;
-    this.newItem.priority = 1;
-    this.newItem.updates = [];
-    this.newItem.completed_percentage=0;
-    console.log("new Item" + JSON.stringify(this.newItem));
-    this.firebaseProvider.addPlannerItem(this.newItem);
+    let newItem = this.newItem;
+    this.newItem = new PlannerItemComponent();
+    this.newItem.name = "";
+    console.log("item name1111" + newItem.name);
+    console.log("item name 3333 " + this.newItem.name);
+    newItem.date = this.getDateObject(this.myDate);
+    newItem.status = Status.CREATED;
+    newItem.priority = 1;
+    newItem.updates = [];
+    newItem.completed_percentage=0;
+    console.log("new Item" + JSON.stringify(newItem));
+    this.firebaseProvider.addPlannerItem(newItem);
   }
 
   removeItem(id) {
@@ -208,7 +231,7 @@ export class HomePage {
   }
 
   updateCompleted(event:Event,id) {
-  
+
     event.stopPropagation();
 
     const alert = this.alertCtrl.create({
@@ -237,7 +260,7 @@ export class HomePage {
   }
 
   moveCurrent(){
-    this.myDate = new Date().toISOString();
+    this.myDate = new Date();
     this.changeDate();
   }
 
@@ -248,8 +271,8 @@ export class HomePage {
   }
 
   getCurrentDateObj():IDate {
-    let date = this.truncateDate(new Date().toISOString());
-    return this.getDateObject(date);
+    //let date = this.truncateDate(new Date().toISOString());
+    return this.getDateObject(new Date());
   }
 
   truncateDate(date:string):string{
@@ -260,14 +283,17 @@ export class HomePage {
   /**
    * returns the Date Object(IDate) for the provided
    * date
-   * @param date 
+   * @param date
    */
-  getDateObject(date: string): IDate {
-    let date_split = date.split("-");
-    let current_year = date_split[0];
-    let current_month = date_split[1];
-    let current_date = date_split[2];
-    return { "date": current_date, "month": current_month, "year": current_year };
+  getDateObject(date: Date): IDate {
+   // let date_split = date.split("/");
+    let current_year = date.getFullYear().toString();
+    let current_month = (date.getMonth()+1).toString();
+    let current_date = date.getDate().toString();
+
+    var dd=  { "date": current_date, "month": current_month, "year": current_year };
+    console.log("date---",dd,new Date(dd.year+"-"+dd.month+"-"+dd.date));
+    return dd;
   }
 
 

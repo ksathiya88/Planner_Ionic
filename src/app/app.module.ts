@@ -4,14 +4,14 @@ import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 
- 
+
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 import { LoginPage } from '../pages/login/login';
 import { RegisterPage } from '../pages/register/register';
 import { DragulaModule } from 'ng2-dragula';
 import { IonicStorageModule } from '@ionic/storage';
- 
+import { DatePickerModule } from 'ionic-calendar-date-picker';
 import { HttpModule } from '@angular/http';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -23,7 +23,7 @@ import { UserServiceProvider } from '../providers/user-service/user-service';
 import {PlannerItemComponent} from '../components/planner-item/planner-item';
 import {ProgressBarComponent} from '../components/progress-bar/progress-bar';
 import {PlannerItemModalPage} from '../pages/planner-item-modal/planner-item-modal';
- 
+
 const firebaseConfig = {
     apiKey: "AIzaSyCiQpcwhlRwc4p_V--111o-2PexiraT--4",
     authDomain: "planningapp-331cb.firebaseapp.com",
@@ -32,7 +32,7 @@ const firebaseConfig = {
     storageBucket: "planningapp-331cb.appspot.com",
     messagingSenderId: "229712215807"
   };
- 
+
 @NgModule({
   declarations: [
     MyApp,
@@ -45,6 +45,7 @@ const firebaseConfig = {
   ],
   imports: [
     BrowserModule,
+    DatePickerModule,
     HttpModule,
     AngularFireDatabaseModule,
     AngularFireModule.initializeApp(firebaseConfig),

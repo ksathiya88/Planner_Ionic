@@ -28,9 +28,11 @@
     </ion-col>
     <ion-col>
       <ion-item>
-        <ion-label>Date</ion-label>
-        <ion-datetime (ngModelChange)="changeDate()" displayFormat="MM/DD/YYYY" [(ngModel)]="myDate">
-        </ion-datetime>
+         <ion-label>Date</ion-label>
+         <ion-input  [ngModel]="myDate | date : 'shortDate'"
+                   (ngModelChange)="myDate=$event"
+                    style="opacity: 1!important;cursor: pointer"
+                   (click)="presentCalendarModal()" disabled></ion-input>
       </ion-item>
     </ion-col>
   </ion-row>
