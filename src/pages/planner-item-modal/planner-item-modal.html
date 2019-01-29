@@ -7,7 +7,8 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>{{item_name}}</ion-title>
+    <ion-title>{{item_name}}
+      <ion-icon name="close-circle" (click)="close()" style="float:right"></ion-icon></ion-title>
   </ion-navbar>
 
 </ion-header>
@@ -19,19 +20,23 @@
       <ion-input type="text" [(ngModel)]="item_name"></ion-input>
     </ion-item>
     <ion-item>
+      <ion-label>Description:</ion-label>
+      <ion-textarea type="text" [(ngModel)]="description"></ion-textarea>
+    </ion-item>
+    <ion-item>
       <ion-row>
         <ion-col>
           <ion-item>
-            <ion-input type="text" [(ngModel)]="newUpdate" placeholder="Add Update"></ion-input>
+            <ion-input type="text" [(ngModel)]="newSubTaskName" placeholder="Add Subtasks"></ion-input>
           </ion-item>
         </ion-col>
         <ion-col>
-          <button ion-button (click)="addUpdate()" [disabled]="newUpdate==''">Add Update</button>
+          <button ion-button (click)="addSubTask()" [disabled]="newSubTaskName==''">Add Subtasks</button>
         </ion-col>
       </ion-row>
       <ion-list>
-        <ion-item *ngFor="let update of item_updates">
-          {{update}}
+        <ion-item *ngFor="let subtask of subTasks">
+          {{subtask.name}}
         </ion-item>
       </ion-list>
     </ion-item>

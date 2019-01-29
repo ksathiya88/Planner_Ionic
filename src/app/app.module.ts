@@ -23,6 +23,8 @@ import { UserServiceProvider } from '../providers/user-service/user-service';
 import {PlannerItemComponent} from '../components/planner-item/planner-item';
 import {ProgressBarComponent} from '../components/progress-bar/progress-bar';
 import {PlannerItemModalPage} from '../pages/planner-item-modal/planner-item-modal';
+import {CalendarComponent} from "../components/calendar/calendar";
+import {PlannerSubTaskComponent} from "../components/planner-sub-item/planner-sub-item";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCiQpcwhlRwc4p_V--111o-2PexiraT--4",
@@ -40,8 +42,10 @@ const firebaseConfig = {
     LoginPage,
     RegisterPage,
     PlannerItemComponent,
+    PlannerSubTaskComponent,
     PlannerItemModalPage,
-    ProgressBarComponent
+    ProgressBarComponent,
+    CalendarComponent
   ],
   imports: [
     BrowserModule,
@@ -59,7 +63,8 @@ const firebaseConfig = {
     HomePage,
     LoginPage,
     RegisterPage,
-    PlannerItemModalPage
+    PlannerItemModalPage,
+    CalendarComponent
   ],
   providers: [
     StatusBar,
