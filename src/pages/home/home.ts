@@ -244,6 +244,7 @@ export class HomePage {
   }
 
   updateItem(id, changedObj) {
+    console.log("cccc",changedObj);
     this.firebaseProvider.updatePlannerItem(id, changedObj);
   }
 
@@ -251,6 +252,50 @@ export class HomePage {
     this.firebaseProvider.updateSubPlannerItem(itemKey, id, changedObj);
   }
 
+  toggleSubTask(itemKey){
+    var currentItem:PlannerItemComponent = this.filPlannerItems.find((item:PlannerItemComponent)=>{
+      return item.$key=itemKey;
+    });
+    currentItem.subtaskNotHidden=!currentItem.subtaskNotHidden;
+  }
+
+  addSubTask(itemKey) {
+    console.log("hello11111");
+    let plannersubTask = new PlannerSubTaskComponent();
+    plannersubTask.name = "";
+
+    //console.log("SubTasks",this.item.subtasks);
+    var currentItem:PlannerItemComponent = this.filPlannerItems.find((item:PlannerItemComponent)=>{
+      return item.$key=itemKey;
+    });
+
+    this.updatePercentage(itemKey,true);
+    //this.newSubTaskName='';
+    currentItem.subtasks.push(plannersubTask);
+    console.log("22222",currentItem.$key);
+    this.firebaseProvider.addSubTaskItem(itemKey,plannersubTask);
+  }
+
+  updatePercentage(itemkey,addition:boolean=true){
+    let currentItem = this.filPlannerItems.find((item:PlannerItemComponent) =>{
+      return item.$key=itemkey;
+    });
+    let subtasksComp:Array<PlannerSubTaskComponent> = currentItem.subtasks.filter((subtask)=>{
+      return subtask.status==Status.COMPLETED
+    });
+    console.log("subtask length",currentItem.subtasks.length);
+    console.log("subtasksComp lenght",subtasksComp.length);
+    let subtasksLength = currentItem.subtasks.length;
+    let subtasksCompLength = subtasksComp.length;
+    if(addition){
+      subtasksLength++;
+    }else {
+      subtasksCompLength++;
+    }
+
+    let percentage = Math.round(100/(subtasksLength/(subtasksCompLength)));
+    this.updateItem(itemkey, {completed_percentage: percentage});
+  }
 
   updateCompleted(event: Event, id, itemkey?: string) {
     console.log("sub task key" + id);
@@ -264,10 +309,12 @@ export class HomePage {
         {
           text: 'Yes, go ahead',
           handler: () => {
-            if (itemkey)
-              this.updateSubTaskItem(itemkey, id, {completed_percentage: 100, status: Status.COMPLETED})
-            else
+            if (itemkey) {
+              this.updatePercentage(itemkey,false);
+              this.updateSubTaskItem(itemkey, id, {completed_percentage: 100, status: Status.COMPLETED});
+            }else {
               this.updateItem(id, {completed_percentage: 100, status: Status.COMPLETED, priority: 100});
+            }
           }
         },
         {

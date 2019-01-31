@@ -25,6 +25,7 @@ export class PlannerItemComponent implements IPlannerItem  {
   subtasks:Array<PlannerSubTaskComponent>=[];
   updates:Array<string>=[];
   completed_percentage:number=0;
+  subtaskNotHidden:boolean=true;
 
 
   constructor() {
