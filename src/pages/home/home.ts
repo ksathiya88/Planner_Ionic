@@ -82,8 +82,6 @@ export class HomePage {
           console.log("dropModel" + name + " " + sourceModel + " " + targetModel);
         })
     );
-
-
   }
 
   presentToast() {
@@ -219,7 +217,6 @@ export class HomePage {
     })
   }
 
-
   addItem() {
     let newItem = this.newItem;
     this.newItem = new PlannerItemComponent();
@@ -237,64 +234,106 @@ export class HomePage {
   }
 
   removeItem(id, itemKey?: string) {
-    if (itemKey)
-      this.firebaseProvider.removeSubItem(itemKey, id);
-    else
+    if (itemKey) {
+      this.updatePercentage(itemKey, false, true, id).then(()=>{
+        this.firebaseProvider.removeSubItem(itemKey, id);
+      });
+
+    } else {
       this.firebaseProvider.removeItem(id);
+    }
   }
 
-  updateItem(id, changedObj) {
-    console.log("cccc",changedObj);
-    this.firebaseProvider.updatePlannerItem(id, changedObj);
+  updateItem(id, changedObj):Promise<void> {
+    if (changedObj.name == "") {
+      console.log("inside22222");
+      const toast = this.toastCtrl.create({
+        message: 'Item is empty.Will not be Saved',
+        duration: 5000,
+        position: 'middle'
+      });
+      toast.present();
+      return;
+    }
+    console.log("cccc", changedObj);
+    return this.firebaseProvider.updatePlannerItem(id, changedObj);
   }
 
   updateSubTaskItem(itemKey, id, changedObj) {
+    if (changedObj.name == "") {
+      console.log("inside22222");
+      const toast = this.toastCtrl.create({
+        message: 'Item is empty.Will not be Saved',
+        duration: 5000,
+        position: 'middle'
+      });
+      toast.present();
+      return;
+    }
     this.firebaseProvider.updateSubPlannerItem(itemKey, id, changedObj);
   }
 
-  toggleSubTask(itemKey){
-    var currentItem:PlannerItemComponent = this.filPlannerItems.find((item:PlannerItemComponent)=>{
-      return item.$key=itemKey;
+  toggleSubTask(itemKey) {
+    var currentItem: PlannerItemComponent = this.filPlannerItems.find((item: PlannerItemComponent) => {
+      return item.$key == itemKey;
     });
-    currentItem.subtaskNotHidden=!currentItem.subtaskNotHidden;
+    console.log("SubtaskItem22222", currentItem.$key, itemKey);
+    currentItem.subtaskNotHidden = !currentItem.subtaskNotHidden;
   }
 
   addSubTask(itemKey) {
     console.log("hello11111");
+
     let plannersubTask = new PlannerSubTaskComponent();
-    plannersubTask.name = "";
 
     //console.log("SubTasks",this.item.subtasks);
-    var currentItem:PlannerItemComponent = this.filPlannerItems.find((item:PlannerItemComponent)=>{
-      return item.$key=itemKey;
+    var currentItem: PlannerItemComponent = this.filPlannerItems.find((item: PlannerItemComponent) => {
+      return item.$key == itemKey;
     });
 
-    this.updatePercentage(itemKey,true);
+    plannersubTask.name = `${++currentItem.subtasks.length}:`;
+
+    this.updatePercentage(itemKey, true);
     //this.newSubTaskName='';
     currentItem.subtasks.push(plannersubTask);
-    console.log("22222",currentItem.$key);
-    this.firebaseProvider.addSubTaskItem(itemKey,plannersubTask);
+    console.log("22222", currentItem.$key);
+    this.firebaseProvider.addSubTaskItem(itemKey, plannersubTask);
   }
 
-  updatePercentage(itemkey,addition:boolean=true){
-    let currentItem = this.filPlannerItems.find((item:PlannerItemComponent) =>{
-      return item.$key=itemkey;
+  updatePercentage(itemkey, addition: boolean = true, removal: boolean = false, subTaskKey?: string):Promise<void> {
+    let currentItem = this.filPlannerItems.find((item: PlannerItemComponent) => {
+      return item.$key == itemkey;
     });
-    let subtasksComp:Array<PlannerSubTaskComponent> = currentItem.subtasks.filter((subtask)=>{
-      return subtask.status==Status.COMPLETED
+    let subtasksComp: Array<PlannerSubTaskComponent> = currentItem.subtasks.filter((subtask) => {
+      return subtask.status == Status.COMPLETED
     });
-    console.log("subtask length",currentItem.subtasks.length);
-    console.log("subtasksComp lenght",subtasksComp.length);
+    console.log("subtask length", currentItem.subtasks.length);
+    console.log("subtasksComp lenght", subtasksComp.length);
     let subtasksLength = currentItem.subtasks.length;
     let subtasksCompLength = subtasksComp.length;
-    if(addition){
+    if (addition) {
       subtasksLength++;
-    }else {
+    } else if (removal==true) {
+      subtasksLength--;
+      let subTaskCompleted = subtasksComp.find((subtask) => {
+        return subtask.$key == subTaskKey;
+      });
+      if (subTaskCompleted) {
+        subtasksCompLength--;
+      }
+      console.log("removal ----", subtasksLength, subtasksCompLength);
+    } else {
       subtasksCompLength++;
     }
 
-    let percentage = Math.round(100/(subtasksLength/(subtasksCompLength)));
-    this.updateItem(itemkey, {completed_percentage: percentage});
+    let percentage = Math.round(100 / (subtasksLength / (subtasksCompLength)));
+
+    console.log("updateItem percentage", itemkey);
+    if (!isNaN(percentage)) {
+      return this.updateItem(itemkey, {completed_percentage: percentage});
+    } else {
+      return this.updateItem(itemkey, {completed_percentage: 0});
+    }
   }
 
   updateCompleted(event: Event, id, itemkey?: string) {
@@ -310,9 +349,9 @@ export class HomePage {
           text: 'Yes, go ahead',
           handler: () => {
             if (itemkey) {
-              this.updatePercentage(itemkey,false);
+              this.updatePercentage(itemkey, false);
               this.updateSubTaskItem(itemkey, id, {completed_percentage: 100, status: Status.COMPLETED});
-            }else {
+            } else {
               this.updateItem(id, {completed_percentage: 100, status: Status.COMPLETED, priority: 100});
             }
           }

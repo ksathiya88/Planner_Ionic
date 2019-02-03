@@ -43,9 +43,10 @@
         <ion-item
           [ngStyle]="{'background-color':item.status === 'completed' ? 'red' : 'yellow' }">
           <!--<ion-grid item-content>-->
-          <ion-icon name="arrow-dropdown" (click)="toggleSubTask(item.$key)"item-left large *ngIf="!item.subtaskNotHidden && item.subtasks">
+
+          <ion-icon name="arrow-dropdown" (click)="toggleSubTask(item.$key)"item-left large *ngIf="item.subtaskNotHidden && item.subtasks.length>0">
           </ion-icon>
-          <ion-icon name="arrow-dropright" (click)="toggleSubTask(item.$key)" item-left large *ngIf="item.subtaskNotHidden && item.subtasks">
+          <ion-icon name="arrow-dropright" (click)="toggleSubTask(item.$key)" item-left large *ngIf="!item.subtaskNotHidden && item.subtasks.length>0">
           </ion-icon>
           <ion-icon name="add-circle" item-right (click)="addSubTask(item.$key)"></ion-icon>
 
