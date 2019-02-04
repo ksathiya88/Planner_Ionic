@@ -7,64 +7,83 @@
 </ion-header>
 
 <ion-content padding class="home-content">
-  <ion-row>
-    <ion-col>
-      <ion-item>
-        <ion-input type="text" [(ngModel)]="newItem.name" placeholder="Add Item"></ion-input>
-      </ion-item>
-    </ion-col>
-    <ion-col>
-      <button ion-button (click)="addItem()" [disabled]="newItem.name=='' || newItem.name == undefined">Add!</button>
-    </ion-col>
-    <ion-col col-2>
-      <!-- <button ion-item  (click)="logout()"> -->
-      <ion-icon ion-item item-left color="primary" name="log-out" (click)="logout()"></ion-icon>
-      <!-- </button> -->
-    </ion-col>
-  </ion-row>
-  <ion-row>
-    <ion-col>
-      <button ion-button (click)="moveCurrent()" small>Move to Today</button>
-    </ion-col>
-    <ion-col>
-      <ion-item>
-        <ion-label>Date</ion-label>
-        <ion-input [ngModel]="myDate | date : 'shortDate'"
-                   (ngModelChange)="myDate=$event"
-                   style="opacity: 1!important;cursor: pointer"
-                   (click)="presentCalendarModal()" disabled></ion-input>
-      </ion-item>
-    </ion-col>
-  </ion-row>
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-input type="text" [(ngModel)]="newItem.name" placeholder="Add Item"></ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col>
+        <button ion-button (click)="addItem()" [disabled]="newItem.name=='' || newItem.name == undefined">Add!</button>
+      </ion-col>
+      <ion-col col-2>
+        <!-- <button ion-item  (click)="logout()"> -->
+        <ion-icon ion-item item-left color="primary" name="log-out" (click)="logout()"></ion-icon>
+        <!-- </button> -->
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <button ion-button (click)="moveCurrent()" small>Move to Today</button>
+      </ion-col>
+      <ion-col>
+        <ion-item>
+          <ion-label>Date</ion-label>
+          <ion-input [ngModel]="myDate | date : 'shortDate'"
+                     (ngModelChange)="myDate=$event"
+                     style="opacity: 1!important;cursor: pointer"
+                     (click)="presentCalendarModal()" disabled></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
   <ion-list class="container" dragula="PLANNERITEMS" [(dragulaModel)]="filPlannerItems">
     <div *ngFor="let item of filPlannerItems; let i = index">
       <ion-item-sliding (ionSwipe)="removeItem(item.$key)"
                         [ngStyle]="{'background-color':item.status === 'completed' ? 'red' : 'yellow' }">
+
         <ion-item
-          [ngStyle]="{'background-color':item.status === 'completed' ? 'red' : 'yellow' }">
-          <!--<ion-grid item-content>-->
+                  [ngStyle]="{'background-color':item.status === 'completed' ? 'red' : 'yellow' }">
+          <ion-grid   no-lines>
+            <ion-row  >
+              <ion-col>
+                <!--<ion-item>-->
+                <div style="display: flex;flex-direction: column;justify-content: space-between">
+                  <ion-icon style="font-size: 1.8em" name="md-checkmark-circle" *ngIf="isCompleted(item)" large></ion-icon>
+                  <ion-icon style="font-size: 1.8em" name="md-checkmark-circle-outline" *ngIf="!isCompleted(item)"
+                            (click)="updateCompleted($event,item.$key);$event.stopPropagation()" large></ion-icon>
 
-          <ion-icon name="arrow-dropdown" (click)="toggleSubTask(item.$key)"item-left large *ngIf="item.subtaskNotHidden && item.subtasks.length>0">
-          </ion-icon>
-          <ion-icon name="arrow-dropright" (click)="toggleSubTask(item.$key)" item-left large *ngIf="!item.subtaskNotHidden && item.subtasks.length>0">
-          </ion-icon>
-          <ion-icon name="add-circle" item-right (click)="addSubTask(item.$key)"></ion-icon>
-
-          <ion-badge item-right large>{{i+1}}</ion-badge>
-
-          <ion-icon name="md-checkmark-circle" *ngIf="isCompleted(item)" item-left large></ion-icon>
-          <ion-icon name="md-checkmark-circle-outline" *ngIf="!isCompleted(item)"
-                    (click)="updateCompleted($event,item.$key);$event.stopPropagation()" item-left large></ion-icon>
-          <ion-badge color="secondary" item-left large>{{item.completed_percentage}}%</ion-badge>
-          <ion-input (ionBlur)="updateItem(item.$key,{name:$event.value})" [value]="item.name"
-                     placeholder="Enter Task"></ion-input>
-          <ion-badge [color]="!isCompleted(item) && isDueDateToday(item)?'light':'danger'" item-right>
-            <b><span *ngIf="!isCompleted(item) && !isDueDateToday(item)">Due by {{item.due_days}} Days</span>
-              <span *ngIf="!isCompleted(item) && isDueDateToday(item)">Created Today</span>
-              <span *ngIf="isCompleted(item)">Completed</span></b>
-          </ion-badge>
-
-          <!--</ion-grid>-->
+                  <ion-icon style="font-size: 1.8em" name="add-circle" (click)="addSubTask(item.$key)" large></ion-icon>
+                  <ion-icon style="font-size: 1.8em;margin-left:4px" name="arrow-dropdown" (click)="toggleSubTask(item.$key)"
+                            *ngIf="item.subtaskNotHidden && item.subtasks.length>0" large>
+                  </ion-icon>
+                  <ion-icon style="font-size: 1.8em;margin-left:4px" name="arrow-dropright" (click)="toggleSubTask(item.$key)"
+                            *ngIf="!item.subtaskNotHidden && item.subtasks.length>0" large>
+                  </ion-icon>
+                </div>
+                <!--</ion-item>-->
+              </ion-col>
+              <ion-col col-10 >
+                <ion-row>
+                  <ion-item [ngStyle]="{'background-color':item.status === 'completed' ? 'red' : 'yellow' }">
+                    <ion-input (ionBlur)="updateItem(item.$key,{name:$event.value})" [value]="item.name"
+                               placeholder="Enter Task"></ion-input>
+                  </ion-item>
+                </ion-row>
+                <ion-row>
+                  <ion-badge item-left large>{{i+1}}</ion-badge>
+                  <ion-badge color="secondary" item-left large>{{item.completed_percentage}}%</ion-badge>
+                  <ion-badge [color]="!isCompleted(item) && isDueDateToday(item)?'light':'danger'" item-right>
+                    <b><span
+                      *ngIf="!isCompleted(item) && !isDueDateToday(item)">Due by {{item.due_days}} Days</span>
+                      <span *ngIf="!isCompleted(item) && isDueDateToday(item)">Created Today</span>
+                      <span *ngIf="isCompleted(item)">Completed</span></b>
+                  </ion-badge>
+                </ion-row>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
         </ion-item>
 
         <ion-item-options side="right">
@@ -72,26 +91,26 @@
         </ion-item-options>
       </ion-item-sliding>
 
-      <div *ngIf="item.subtaskNotHidden" >
-      <ion-item-sliding  (ionSwipe)="removeItem(sub_task.$key)" *ngFor="let sub_task of item.subtasks; let i = index"
-                        [ngStyle]="{'background-color':sub_task.status === 'completed' ? 'red' : 'yellow' }">
-        <ion-item [ngStyle]="{'background-color':sub_task.status === 'completed' ? 'red' : '#ffff66' }">
-          <ion-icon name="return-right" item-left></ion-icon>
-          <ion-icon style="margin-left: 1em" name="md-checkmark-circle" *ngIf="isCompleted(sub_task)" item-left
-          ></ion-icon>
-          <ion-icon style="margin-left: 1em" name="md-checkmark-circle-outline" *ngIf="!isCompleted(sub_task)"
-                    (click)="updateCompleted($event,sub_task.$key,item.$key);$event.stopPropagation()" item-left
-          ></ion-icon>
+      <div *ngIf="item.subtaskNotHidden">
+        <ion-item-sliding (ionSwipe)="removeItem(sub_task.$key)" *ngFor="let sub_task of item.subtasks; let i = index"
+                          [ngStyle]="{'background-color':sub_task.status === 'completed' ? 'red' : 'yellow' }">
+          <ion-item [ngStyle]="{'background-color':sub_task.status === 'completed' ? 'red' : '#ffff66' }">
+            <ion-icon name="return-right" item-left></ion-icon>
+            <ion-icon style="margin-left: 1em" name="md-checkmark-circle" *ngIf="isCompleted(sub_task)" item-left
+            ></ion-icon>
+            <ion-icon style="margin-left: 1em" name="md-checkmark-circle-outline" *ngIf="!isCompleted(sub_task)"
+                      (click)="updateCompleted($event,sub_task.$key,item.$key);$event.stopPropagation()" item-left
+            ></ion-icon>
 
-          <ion-input (ionBlur)="updateSubTaskItem(item.$key,sub_task.$key,{name:$event.value})" [value]="sub_task.name"
-                     placeholder="Enter SubTask"></ion-input>
-        </ion-item>
-        <ion-item-options side="right">
-          <button ion-button expandable color="danger" (click)="removeItem(sub_task.$key,item.$key)">Delete</button>
-        </ion-item-options>
-      </ion-item-sliding>
+            <ion-input (ionBlur)="updateSubTaskItem(item.$key,sub_task.$key,{name:$event.value})"
+                       [value]="sub_task.name"
+                       placeholder="Enter SubTask"></ion-input>
+          </ion-item>
+          <ion-item-options side="right">
+            <button ion-button expandable color="danger" (click)="removeItem(sub_task.$key,item.$key)">Delete</button>
+          </ion-item-options>
+        </ion-item-sliding>
       </div>
-
     </div>
   </ion-list>
 </ion-content>

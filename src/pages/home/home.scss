@@ -33,4 +33,8 @@ page-home {
         -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
         filter: alpha(opacity=20);
       }
+
+      .item-inner>.input-wrapper>ion-label {
+        margin:0px !important;
+      }
 }
