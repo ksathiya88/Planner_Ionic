@@ -1,26 +1,25 @@
 <ion-header class="home-header">
-  <ion-navbar color="primary">
+  <ion-toolbar color="primary">
+     <ion-buttons style="position:absolute;display:inline;right:25px" slot="secondary">
+        <button ion-button>
+        <ion-icon  name="log-out"></ion-icon>
+        </button>
+      </ion-buttons>
     <ion-title>
       Planner
     </ion-title>
-  </ion-navbar>
+  </ion-toolbar>
 </ion-header>
-
 <ion-content padding class="home-content">
   <ion-grid>
     <ion-row>
-      <ion-col>
+      <ion-col col-10>
         <ion-item>
           <ion-input type="text" [(ngModel)]="newItem.name" placeholder="Add Item"></ion-input>
         </ion-item>
       </ion-col>
-      <ion-col>
-        <button ion-button (click)="addItem()" [disabled]="newItem.name=='' || newItem.name == undefined">Add!</button>
-      </ion-col>
       <ion-col col-2>
-        <!-- <button ion-item  (click)="logout()"> -->
-        <ion-icon ion-item item-left color="primary" name="log-out" (click)="logout()"></ion-icon>
-        <!-- </button> -->
+        <button ion-button (click)="addItem()" [disabled]="newItem.name=='' || newItem.name == undefined">Add!</button>
       </ion-col>
     </ion-row>
     <ion-row>

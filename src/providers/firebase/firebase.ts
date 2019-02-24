@@ -41,15 +41,16 @@ export class FirebaseProvider {
   }
 
   removeItem(id) {
+    console.log("remove",id);
     this.afd.list('/plannerItems'+'-'+this.uid+'/').remove(id);
   }
 
-
   removeSubItem(itemKey,id) {
+    console.log("remove subtask",itemKey);
     this.afd.list('/plannerItems'+'-'+this.uid+`/${itemKey}/subtasks`).remove(id);
   }
 
-  updatePlannerItem(id,changedObj):any{
+  updatePlannerItem(id,changedObj):any {
     console.log("uid-key",id);
     return this.afd.list('/plannerItems'+'-'+this.uid+'/').update(id,changedObj);
   }
